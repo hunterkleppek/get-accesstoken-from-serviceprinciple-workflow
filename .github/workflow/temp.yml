@@ -1,0 +1,45 @@
+name: Example Azure DevOps Token Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      organization:
+        description: 'Azure DevOps organization name'
+        required: true
+        default: 'your-organization'
+
+jobs:
+  get-ado-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get Azure DevOps Token
+        id: get-ado-token
+        uses: ./get-token-action
+        with:
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          organization: ${{ github.event.inputs.organization }}
+
+      - name: Use the token (example)
+        shell: pwsh
+        run: |
+          # Don't print the token in real workflows
+          Write-Host "Token obtained successfully"
+          
+          # Example API call to list projects
+          $token = "${{ steps.get-ado-token.outputs.token }}"
+          $organization = "${{ github.event.inputs.organization }}"
+          
+          $headers = @{
+              Authorization = "Bearer $token"
+          }
+          
+          $apiUrl = "https://dev.azure.com/$organization/_apis/projects?api-version=7.0"
+          $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers
+          
+          Write-Host "Found $($response.count) projects in organization '$organization'"
+          $response.value | Select-Object id, name, description | Format-Table
