@@ -1,0 +1,30 @@
+name: 'Get Azure DevOps Token'
+description: 'Obtains an access token for Azure DevOps using a service principal'
+inputs:
+  tenant-id:
+    required: true
+    description: 'Azure AD tenant ID where the service principal is registered'
+  client-id:
+    required: true
+    description: 'Application (client) ID of the service principal'
+  client-secret:
+    required: true
+    description: 'Client secret of the service principal'
+  organization:
+    required: true
+    description: 'Azure DevOps organization name (without the URL)'
+outputs:
+  token:
+    description: 'The access token for Azure DevOps'
+    value: ${{ steps.get-token.outputs.token }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Get Azure DevOps Token
+      id: get-token
+      shell: pwsh
+      run: |
+        $scriptPath = Join-Path -Path ${{ github.action_path }} -ChildPath "Get-AzureDevOpsToken.ps1"
+        $token = & $scriptPath -TenantId "${{ inputs.tenant-id }}" -ClientId "${{ inputs.client-id }}" -ClientSecret "${{ inputs.client-secret }}" -Organization "${{ inputs.organization }}"
+        echo "::add-mask::$token"
+        echo "token=$token" >> $env:GITHUB_OUTPUT
