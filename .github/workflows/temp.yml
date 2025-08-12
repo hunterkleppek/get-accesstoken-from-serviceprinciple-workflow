@@ -17,7 +17,7 @@ jobs:
 
       - name: Get Azure DevOps Token
         id: get-ado-token
-        uses: ./get-token-action
+        uses: ./
         with:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
