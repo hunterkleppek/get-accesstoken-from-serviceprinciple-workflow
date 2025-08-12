@@ -6,7 +6,7 @@ on:
       organization:
         description: 'Azure DevOps organization name'
         required: true
-        default: 'your-organization'
+        default: 'SECURAInsurance'
 
 jobs:
   get-ado-token:
